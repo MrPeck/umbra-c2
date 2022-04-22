@@ -15,10 +15,32 @@ type C2Config struct {
 	Port string
 }
 
-func ConnIsClosed(c net.Conn) bool {
+func connIsClosed(c net.Conn) bool {
 	r := bufio.NewReader(c)
 	_, err := r.Peek(1)
 	return err == io.EOF
+}
+
+func clientCleanupCronJob(d time.Duration) {
+	cleanupClientsTicker := time.NewTicker(d)
+	go func() {
+		for {
+			<-cleanupClientsTicker.C
+			fmt.Println("client cleanup")
+			for name, conn := range Clients {
+				if connIsClosed(conn) {
+					err := conn.Close()
+
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					delete(Clients, name)
+					fmt.Println("cleaned client", name)
+				}
+			}
+		}
+	}()
 }
 
 func Run(c *C2Config) error {
@@ -39,25 +61,7 @@ func Run(c *C2Config) error {
 		}
 	}()
 
-	cleanupClientsTicker := time.NewTicker(30 * time.Second)
-	go func() {
-		for {
-			<-cleanupClientsTicker.C
-			fmt.Println("client cleanup")
-			for name, conn := range Clients {
-				if ConnIsClosed(conn) {
-					err := conn.Close()
-
-					if err != nil {
-						fmt.Println(err)
-					}
-
-					delete(Clients, name)
-					fmt.Println("cleaned client", name)
-				}
-			}
-		}
-	}()
+	clientCleanupCronJob(30 * time.Second)
 
 	for {
 		client, err := server.Accept()
