@@ -20,7 +20,7 @@ type C2Config struct {
 	Port string
 }
 
-var Clients map[string]*C2Client
+var Clients map[uuid.UUID]*C2Client
 
 func NewC2Client(c net.Conn) *C2Client {
 	return &C2Client{
@@ -85,6 +85,6 @@ func Run(c *C2Config) error {
 		}
 
 		client := NewC2Client(conn)
-		Clients[client.Id.String()] = client
+		Clients[client.Id] = client
 	}
 }

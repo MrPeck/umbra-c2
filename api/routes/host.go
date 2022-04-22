@@ -37,7 +37,7 @@ func GetHost(c *gin.Context) {
 		return
 	}
 
-	if client, ok := c2.Clients[id.String()]; ok {
+	if client, ok := c2.Clients[id]; ok {
 		c.JSON(http.StatusOK, newHost(client))
 	} else {
 		c.Status(http.StatusNotFound)
