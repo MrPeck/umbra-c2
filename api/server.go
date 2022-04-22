@@ -21,7 +21,7 @@ func Run(c *APIConfig) {
 	{
 		specificHost := host.Group("/:id")
 		{
-			specificHost.GET("/", routes.Host)
+			specificHost.GET("/", routes.GetHost)
 			specificHost.GET("/file", routes.HostFile)
 		}
 	}
