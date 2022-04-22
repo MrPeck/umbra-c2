@@ -84,6 +84,7 @@ func Run(c *C2Config) error {
 			return err
 		}
 
-		Clients[conn.RemoteAddr().String()] = NewC2Client(conn)
+		client := NewC2Client(conn)
+		Clients[client.Id.String()] = client
 	}
 }
