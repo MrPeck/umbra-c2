@@ -13,7 +13,7 @@ type Host struct {
 	Id   uuid.UUID
 }
 
-func Hosts(c *gin.Context) {
+func GetHosts(c *gin.Context) {
 	hosts := make([]Host, 0, len(c2.Clients))
 	for name, client := range c2.Clients {
 		hosts = append(hosts, Host{
@@ -29,6 +29,6 @@ func GetHost(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func HostFile(c *gin.Context) {
+func GetHostFile(c *gin.Context) {
 	c.Status(http.StatusOK)
 }

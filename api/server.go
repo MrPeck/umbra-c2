@@ -15,14 +15,14 @@ type APIConfig struct {
 func Run(c *APIConfig) {
 	router := gin.Default()
 
-	router.GET("/hosts", routes.Hosts)
+	router.GET("/hosts", routes.GetHosts)
 
 	host := router.Group("/host")
 	{
 		specificHost := host.Group("/:id")
 		{
 			specificHost.GET("/", routes.GetHost)
-			specificHost.GET("/file", routes.HostFile)
+			specificHost.GET("/file", routes.GetHostFile)
 		}
 	}
 
