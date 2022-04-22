@@ -6,13 +6,27 @@ import (
 	"io"
 	"net"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-var Clients map[string]net.Conn
+type C2Client struct {
+	Conn net.Conn
+	Id   uuid.UUID
+}
 
 type C2Config struct {
 	Host string
 	Port string
+}
+
+var Clients map[string]*C2Client
+
+func NewC2Client(c net.Conn) *C2Client {
+	return &C2Client{
+		Conn: c,
+		Id:   uuid.New(),
+	}
 }
 
 func connIsClosed(c net.Conn) bool {
@@ -27,9 +41,9 @@ func clientCleanupCronJob(d time.Duration) {
 		for {
 			<-cleanupClientsTicker.C
 			fmt.Println("client cleanup")
-			for name, conn := range Clients {
-				if connIsClosed(conn) {
-					err := conn.Close()
+			for name, client := range Clients {
+				if connIsClosed(client.Conn) {
+					err := client.Conn.Close()
 
 					if err != nil {
 						fmt.Println(err)
@@ -53,8 +67,8 @@ func Run(c *C2Config) error {
 	defer server.Close()
 
 	defer func() {
-		for name, conn := range Clients {
-			err = conn.Close()
+		for name, client := range Clients {
+			err = client.Conn.Close()
 			if err != nil {
 				fmt.Printf("failed to close connection to %s: %v\n", name, err)
 			}
@@ -64,12 +78,12 @@ func Run(c *C2Config) error {
 	clientCleanupCronJob(30 * time.Second)
 
 	for {
-		client, err := server.Accept()
+		conn, err := server.Accept()
 
 		if err != nil {
 			return err
 		}
 
-		Clients[client.RemoteAddr().String()] = client
+		Clients[conn.RemoteAddr().String()] = NewC2Client(conn)
 	}
 }
