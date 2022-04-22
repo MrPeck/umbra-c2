@@ -29,11 +29,22 @@ func GetHosts(c *gin.Context) {
 	c.JSON(http.StatusOK, hosts)
 }
 
-func GetHost(c *gin.Context) {
+func HostMiddleware(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.AbortWithStatus(http.StatusNotFound)
+	} else {
+		c.Set("id", id)
+		c.Next()
+	}
+}
+
+func GetHost(c *gin.Context) {
+	id, ok := c.MustGet("id").(uuid.UUID)
+
+	if !ok {
+		c.Status(http.StatusInternalServerError)
 		return
 	}
 

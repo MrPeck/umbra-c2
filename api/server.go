@@ -19,7 +19,7 @@ func Run(c *APIConfig) {
 
 	host := router.Group("/host")
 	{
-		specificHost := host.Group("/:id")
+		specificHost := host.Group("/:id", routes.HostMiddleware)
 		{
 			specificHost.GET("/", routes.GetHost)
 			specificHost.GET("/file", routes.GetHostFile)
