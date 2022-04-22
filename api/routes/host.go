@@ -9,14 +9,14 @@ import (
 )
 
 type Host struct {
-	Name string
-	Id   uuid.UUID
+	Address string
+	Id      uuid.UUID
 }
 
 func newHost(c *c2.C2Client) Host {
 	return Host{
-		Name: c.Conn.RemoteAddr().String(),
-		Id:   c.Id,
+		Address: c.Conn.RemoteAddr().String(),
+		Id:      c.Id,
 	}
 }
 
